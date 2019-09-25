@@ -74,7 +74,9 @@ class SpringApplicationBannerPrinter {
 
 	private Banner getBanner(Environment environment) {
 		Banners banners = new Banners();
+		// 如果配置了 图片Banner
 		banners.addIfNotNull(getImageBanner(environment));
+		// 如果配置了text的banner
 		banners.addIfNotNull(getTextBanner(environment));
 		if (banners.hasAtLeastOneBanner()) {
 			return banners;
