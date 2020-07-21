@@ -18,8 +18,6 @@ package org.springframework.boot
 
 import org.springframework.context.ConfigurableApplicationContext
 
-import kotlin.reflect.KClass
-
 /**
  * Top level function acting as a Kotlin shortcut allowing to write
  * `runApplication<FooApplication>(arg1, arg2)` instead of
@@ -29,7 +27,7 @@ import kotlin.reflect.KClass
  * @since 2.0.0
  */
 inline fun <reified T : Any> runApplication(vararg args: String): ConfigurableApplicationContext =
-		SpringApplication.run(T::class.java, *args)
+		SpringApplication.run(T::class.java)
 
 /**
  * Top level function acting as a Kotlin shortcut allowing to write

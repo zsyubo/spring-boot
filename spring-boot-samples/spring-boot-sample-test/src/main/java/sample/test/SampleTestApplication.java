@@ -31,7 +31,8 @@ public class SampleTestApplication {
 	// still run.
 
 	public static void main(String[] args) {
-		SpringApplication.run(SampleTestApplication.class, args);
+//		SpringApplication.run(SampleTestApplication.class, args);
+		SpringApplication.run(SampleTestApplication.class);
 	}
 
 }

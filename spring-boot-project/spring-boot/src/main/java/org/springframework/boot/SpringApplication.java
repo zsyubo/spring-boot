@@ -244,12 +244,18 @@ public class SpringApplication {
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
 		// 判断启动类型：web、webflux、none
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
-		// 获取 bean 工厂实例  设置初始化器？    传入ApplicationContextInitializer的作用是 寻找 实现了ApplicationContextInitializer的 Bean？
+		// 获取 bean 工厂实例  设置初始化器？    传入ApplicationContextInitializer的作用是 寻找 实现了ApplicationContextInitializer的 Bean，
 		setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class));
 		//  寻找配置文件中实现了ApplicationListener的类实例化
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
-		// 推断main 类，很奇葩的方法
+		// 推断main 类，很奇葩但有效的方法，， 直接找堆栈
 		this.mainApplicationClass = deduceMainApplicationClass();
+	}
+
+	public static ConfigurableApplicationContext run(Class<?> sampleTestApplicationClass) {
+		// new 方法
+		String[] args = null;
+		return new SpringApplication(sampleTestApplicationClass).run(args);
 	}
 
 	private Class<?> deduceMainApplicationClass() {
@@ -297,11 +303,12 @@ public class SpringApplication {
 			configureIgnoreBeanInfo(environment);
 			// Banner
 			Banner printedBanner = printBanner(environment);
-			// 根据web类型 创建context
+			// 根据web类型 创建context  AnnotationConfigServletWebServerApplicationContext
 			context = createApplicationContext();
 			// 异常报告器
 			exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
-					new Class[] { ConfigurableApplicationContext.class }, context);
+					new Class[]{ConfigurableApplicationContext.class}, context);
+			// 初始化IOC容器
 			prepareContext(context, environment, listeners, applicationArguments, printedBanner);
 			refreshContext(context);
 			afterRefresh(context, applicationArguments);
@@ -348,20 +355,24 @@ public class SpringApplication {
 
 	private Class<? extends StandardEnvironment> deduceEnvironmentClass() {
 		switch (this.webApplicationType) {
-		case SERVLET:
-			return StandardServletEnvironment.class;
-		case REACTIVE:
-			return StandardReactiveWebEnvironment.class;
-		default:
-			return StandardEnvironment.class;
+			case SERVLET:
+				return StandardServletEnvironment.class;
+			case REACTIVE:
+				return StandardReactiveWebEnvironment.class;
+			default:
+				return StandardEnvironment.class;
 		}
 	}
 
+	// AnnotationConfigServletWebServerApplicationContext
 	private void prepareContext(ConfigurableApplicationContext context, ConfigurableEnvironment environment,
-			SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments, Banner printedBanner) {
+								SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments, Banner printedBanner) {
 		context.setEnvironment(environment);
+		// 做一些前置准备，，自定义beanName生成器、convert加载等
 		postProcessApplicationContext(context);
+		// 执行加载了的Initializers
 		applyInitializers(context);
+		// 准备事件
 		listeners.contextPrepared(context);
 		if (this.logStartupInfo) {
 			logStartupInfo(context.getParent() == null);
@@ -373,11 +384,12 @@ public class SpringApplication {
 		if (printedBanner != null) {
 			beanFactory.registerSingleton("springBootBanner", printedBanner);
 		}
+
 		if (beanFactory instanceof DefaultListableBeanFactory) {
 			((DefaultListableBeanFactory) beanFactory)
 					.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 		}
-		// Load the sources
+		// 获取启动类
 		Set<Object> sources = getAllSources();
 		Assert.notEmpty(sources, "Sources must not be empty");
 		load(context, sources.toArray(new Object[0]));
@@ -602,10 +614,13 @@ public class SpringApplication {
 	 * @param context the application context
 	 */
 	protected void postProcessApplicationContext(ConfigurableApplicationContext context) {
+		// BeanName 生成器，， 默认为 null，这个应该是用来自定义的，不过一般很少自定义去用
+		// 用些时候可能会存在一些重复的BeanName，这时候如果有特殊需求就可以用此来实现。
 		if (this.beanNameGenerator != null) {
 			context.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,
 					this.beanNameGenerator);
 		}
+		// 资源加载
 		if (this.resourceLoader != null) {
 			if (context instanceof GenericApplicationContext) {
 				((GenericApplicationContext) context).setResourceLoader(this.resourceLoader);
@@ -615,6 +630,7 @@ public class SpringApplication {
 			}
 		}
 		if (this.addConversionService) {
+			// 类型转换用的， 注册到converterRegistry    org.springframework.boot.convert.ApplicationConversionService.configure
 			context.getBeanFactory().setConversionService(ApplicationConversionService.getSharedInstance());
 		}
 	}
@@ -687,6 +703,7 @@ public class SpringApplication {
 			logger.debug("Loading source " + StringUtils.arrayToCommaDelimitedString(sources));
 		}
 		BeanDefinitionLoader loader = createBeanDefinitionLoader(getBeanDefinitionRegistry(context), sources);
+		// 如果没注册beanNameGenerator
 		if (this.beanNameGenerator != null) {
 			loader.setBeanNameGenerator(this.beanNameGenerator);
 		}
@@ -727,6 +744,7 @@ public class SpringApplication {
 	 * Get the bean definition registry.
 	 * @param context the application context
 	 * @return the BeanDefinitionRegistry if it can be determined
+	 * 就是返回IOC容器
 	 */
 	private BeanDefinitionRegistry getBeanDefinitionRegistry(ApplicationContext context) {
 		if (context instanceof BeanDefinitionRegistry) {
