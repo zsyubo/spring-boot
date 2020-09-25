@@ -229,24 +229,26 @@ public class SpringApplication {
 	 * beans from the specified primary sources (see {@link SpringApplication class-level}
 	 * documentation for details. The instance can be customized before calling
 	 * {@link #run(String...)}.
-	 * @param resourceLoader the resource loader to use   待使用的资源加载器
+	 *
+	 * @param resourceLoader the resource loader to use 待使用的资源加载器
 	 * @param primarySources the primary bean sources
 	 * @see #run(Class, String[])
 	 * @see #setSources(Set)
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SpringApplication(ResourceLoader resourceLoader, Class<?>... primarySources) {
-		// 成员变量的loader  加载loader，暂时不知道有什么用
+		// 成员变量的loader 加载loader，暂时不知道有什么用
 		this.resourceLoader = resourceLoader;
-		// 断言加载  sources是不是为空
+		// 断言加载 sources是不是为空
 		Assert.notNull(primarySources, "PrimarySources must not be null");
 		// 这儿使用 set来装 sour，主要也是为了去重吧
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
 		// 判断启动类型：web、webflux、none
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
-		// 获取 bean 工厂实例  设置初始化器？    传入ApplicationContextInitializer的作用是 寻找 实现了ApplicationContextInitializer的 Bean，
+		// 获取 bean 工厂实例 设置初始化器？ 传入ApplicationContextInitializer的作用是 寻找
+		// 实现了ApplicationContextInitializer的 Bean，
 		setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class));
-		//  寻找配置文件中实现了ApplicationListener的类实例化
+		// 寻找配置文件中实现了ApplicationListener的类实例化
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
 		// 推断main 类，很奇葩但有效的方法，， 直接找堆栈
 		this.mainApplicationClass = deduceMainApplicationClass();
@@ -278,7 +280,8 @@ public class SpringApplication {
 	/**
 	 * Run the Spring application, creating and refreshing a new
 	 * {@link ApplicationContext}.
-	 * @param args the application arguments (usually passed from a Java main method)  启动传入参数
+	 * @param args the application arguments (usually passed from a Java main method)
+	 * 启动传入参数
 	 * @return a running {@link ApplicationContext}
 	 */
 	public ConfigurableApplicationContext run(String... args) {
@@ -287,10 +290,11 @@ public class SpringApplication {
 		// 开始计时？
 		stopWatch.start();
 		ConfigurableApplicationContext context = null;
-		//  启动错误回调
+		// 启动错误回调
 		Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
 		configureHeadlessProperty();
-		// Run Listener,Spring 生命周期监听器   其中一个：org.springframework.boot.context.event.EventPublishingRunListener
+		// Run Listener,Spring 生命周期监听器
+		// 其中一个：org.springframework.boot.context.event.EventPublishingRunListener
 		// 底层有用jdk观察者模式的，也有新开线程的。
 		SpringApplicationRunListeners listeners = getRunListeners(args);
 		// 事件消息分发
@@ -298,12 +302,12 @@ public class SpringApplication {
 		try {
 			// 封装启动参数
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
-			// 环境， profile 
+			// 环境， profile
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
 			configureIgnoreBeanInfo(environment);
 			// Banner
 			Banner printedBanner = printBanner(environment);
-			// 根据web类型 创建context  AnnotationConfigServletWebServerApplicationContext
+			// 根据web类型 创建context AnnotationConfigServletWebServerApplicationContext
 			context = createApplicationContext();
 			// 异常报告器
 			exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
@@ -433,7 +437,8 @@ public class SpringApplication {
 		// 获取当前 classloader，先尝试获取resourceLoader的加载器，失败则获取线程上下文类加载器，再不行就获取当前类的类加载器。
 		ClassLoader classLoader = getClassLoader();
 		// Use names and ensure unique to protect against duplicates
-		// spring 核心源码的，  set里面是 ApplicationContextInitializer 的实现类的全路径( 配置在 META-INF/spring.factories)
+		// spring 核心源码的， set里面是 ApplicationContextInitializer 的实现类的全路径( 配置在
+		// META-INF/spring.factories)
 		Set<String> names = new LinkedHashSet<>(SpringFactoriesLoader.loadFactoryNames(type, classLoader));
 		// 创建工厂实例
 		List<T> instances = createSpringFactoriesInstances(type, parameterTypes, classLoader, args, names);
@@ -630,7 +635,8 @@ public class SpringApplication {
 			}
 		}
 		if (this.addConversionService) {
-			// 类型转换用的， 注册到converterRegistry    org.springframework.boot.convert.ApplicationConversionService.configure
+			// 类型转换用的， 注册到converterRegistry
+			// org.springframework.boot.convert.ApplicationConversionService.configure
 			context.getBeanFactory().setConversionService(ApplicationConversionService.getSharedInstance());
 		}
 	}
@@ -743,8 +749,7 @@ public class SpringApplication {
 	/**
 	 * Get the bean definition registry.
 	 * @param context the application context
-	 * @return the BeanDefinitionRegistry if it can be determined
-	 * 就是返回IOC容器
+	 * @return the BeanDefinitionRegistry if it can be determined 就是返回IOC容器
 	 */
 	private BeanDefinitionRegistry getBeanDefinitionRegistry(ApplicationContext context) {
 		if (context instanceof BeanDefinitionRegistry) {
@@ -1225,11 +1230,11 @@ public class SpringApplication {
 	}
 
 	/**
-	 * 一般调用此类, 其实这个方法时一个特殊性的方法，现在吧他转为一般性方法而已，一般方法接收的是数组。
-	 * Static helper that can be used to run a {@link SpringApplication} from the
-	 * specified source using default settings.
-	 * @param primarySource the primary source to load   主要加载源
-	 * @param args the application arguments (usually passed from a Java main method)  启动args
+	 * 一般调用此类, 其实这个方法时一个特殊性的方法，现在吧他转为一般性方法而已，一般方法接收的是数组。 Static helper that can be used to
+	 * run a {@link SpringApplication} from the specified source using default settings.
+	 * @param primarySource the primary source to load 主要加载源
+	 * @param args the application arguments (usually passed from a Java main method)
+	 * 启动args
 	 * @return the running {@link ApplicationContext}
 	 */
 	public static ConfigurableApplicationContext drun(Class<?> primarySource, String... args) {

@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 提供访问参数 去使用运行SpringApplication；
- * Provides access to the arguments that were used to run a {@link SpringApplication}.
+ * 提供访问参数 去使用运行SpringApplication； Provides access to the arguments that were used to run a
+ * {@link SpringApplication}.
  *
  * @author Phillip Webb
  * @since 1.3.0
