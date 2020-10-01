@@ -46,11 +46,14 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConfigurableConversionService;
-import org.springframework.core.env.*;
+import org.springframework.core.env.CommandLinePropertySource;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.SpringFactoriesLoader;
-import org.springframework.util.*;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
 import java.lang.reflect.Constructor;
@@ -270,18 +273,22 @@ public class SpringApplication {
 					return Class.forName(stackTraceElement.getClassName());
 				}
 			}
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			// Swallow and continue
 		}
 		return null;
 	}
 
+	public static ConfigurableApplicationContext run(Class<?> primarySource, String... args) {
+		return run(new Class<?>[]{primarySource}, args);
+	}
+
 	/**
 	 * Run the Spring application, creating and refreshing a new
 	 * {@link ApplicationContext}.
+	 *
 	 * @param args the application arguments (usually passed from a Java main method)
-	 * 启动传入参数
+	 *             启动传入参数
 	 * @return a running {@link ApplicationContext}
 	 */
 	public ConfigurableApplicationContext run(String... args) {
