@@ -63,6 +63,7 @@ public class ApplicationConversionService extends FormattingConversionService {
 	 * {@code null})
 	 */
 	public static ConversionService getSharedInstance() {
+		// 懒加载模式
 		ApplicationConversionService sharedInstance = ApplicationConversionService.sharedInstance;
 		if (sharedInstance == null) {
 			synchronized (ApplicationConversionService.class) {

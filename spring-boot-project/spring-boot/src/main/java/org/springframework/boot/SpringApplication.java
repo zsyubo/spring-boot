@@ -308,6 +308,8 @@ public class SpringApplication {
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
 			// 环境， profile
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
+			// 设置系统参数(spring.beaninfo.ignore), 默认为true，一般也不需要
+			// 为true跳过对BeanInfo类的搜索
 			configureIgnoreBeanInfo(environment);
 			// Banner
 			Banner printedBanner = printBanner(environment);
@@ -349,9 +351,11 @@ public class SpringApplication {
 		// 创建并配置环境
 		// Create and configure the environment
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
+		// 初始化类型转换的配置
 		configureEnvironment(environment, applicationArguments.getSourceArgs());
 		// 分发事件
 		listeners.environmentPrepared(environment);
+		// 环境与应用绑定
 		bindToSpringApplication(environment);
 		if (!this.isCustomEnvironment) {
 			environment = new EnvironmentConverter(getClassLoader()).convertEnvironmentIfNecessary(environment,
@@ -376,11 +380,11 @@ public class SpringApplication {
 	private void prepareContext(ConfigurableApplicationContext context, ConfigurableEnvironment environment,
 								SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments, Banner printedBanner) {
 		context.setEnvironment(environment);
-		// 做一些前置准备，，自定义beanName生成器、convert加载等
+		// 后置处理，，自定义beanName生成器、convert加载等
 		postProcessApplicationContext(context);
 		// 执行加载了的Initializers
 		applyInitializers(context);
-		// 准备事件
+		// 发送准备事件
 		listeners.contextPrepared(context);
 		if (this.logStartupInfo) {
 			logStartupInfo(context.getParent() == null);
@@ -394,6 +398,7 @@ public class SpringApplication {
 		}
 
 		if (beanFactory instanceof DefaultListableBeanFactory) {
+			// 设置是否允许通过注册一个同名的不同定义来覆盖bean定义，自动替换前者。false则抛出异常
 			((DefaultListableBeanFactory) beanFactory)
 					.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 		}
@@ -500,7 +505,9 @@ public class SpringApplication {
 	 * @see #configurePropertySources(ConfigurableEnvironment, String[])
 	 */
 	protected void configureEnvironment(ConfigurableEnvironment environment, String[] args) {
+		// true
 		if (this.addConversionService) {
+			// 类型转换的接口
 			ConversionService conversionService = ApplicationConversionService.getSharedInstance();
 			environment.setConversionService((ConfigurableConversionService) conversionService);
 		}
@@ -626,11 +633,12 @@ public class SpringApplication {
 	protected void postProcessApplicationContext(ConfigurableApplicationContext context) {
 		// BeanName 生成器，， 默认为 null，这个应该是用来自定义的，不过一般很少自定义去用
 		// 用些时候可能会存在一些重复的BeanName，这时候如果有特殊需求就可以用此来实现。
+		// 默认为 null
 		if (this.beanNameGenerator != null) {
 			context.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,
 					this.beanNameGenerator);
 		}
-		// 资源加载
+		// 自定义资源加载, 默认为null
 		if (this.resourceLoader != null) {
 			if (context instanceof GenericApplicationContext) {
 				((GenericApplicationContext) context).setResourceLoader(this.resourceLoader);
@@ -654,6 +662,7 @@ public class SpringApplication {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void applyInitializers(ConfigurableApplicationContext context) {
+		// getInitializers 获取排序后的
 		for (ApplicationContextInitializer initializer : getInitializers()) {
 			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(initializer.getClass(),
 					ApplicationContextInitializer.class);
@@ -1150,6 +1159,7 @@ public class SpringApplication {
 		if (!CollectionUtils.isEmpty(this.primarySources)) {
 			allSources.addAll(this.primarySources);
 		}
+		// sources 不太明白，应该是配合SpringApplicationBuilder使用的
 		if (!CollectionUtils.isEmpty(this.sources)) {
 			allSources.addAll(this.sources);
 		}
