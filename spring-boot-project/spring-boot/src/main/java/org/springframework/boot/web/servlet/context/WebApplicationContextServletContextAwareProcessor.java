@@ -16,18 +16,19 @@
 
 package org.springframework.boot.web.servlet.context;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
 import org.springframework.util.Assert;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.support.ServletContextAwareProcessor;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 
 /**
  * Variant of {@link ServletContextAwareProcessor} for use with a
  * {@link ConfigurableWebApplicationContext}. Can be used when registering the processor
  * can occur before the {@link ServletContext} or {@link ServletConfig} have been
  * initialized.
+ * 可以在ServletContext或ServletConfig被初始化之前注册处理器时使用。
  *
  * @author Phillip Webb
  */
