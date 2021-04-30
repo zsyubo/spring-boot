@@ -114,7 +114,7 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		beanFactory.addBeanPostProcessor(new WebApplicationContextServletContextAwareProcessor(this));
-		// 忽略ServletContextAware接口的自动注入
+		// 忽略ServletContextAware接口的自动装配
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		// 初始化scope
 		registerWebApplicationScopes();

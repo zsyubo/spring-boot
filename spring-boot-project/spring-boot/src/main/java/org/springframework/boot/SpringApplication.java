@@ -527,6 +527,7 @@ public class SpringApplication {
 		if (this.defaultProperties != null && !this.defaultProperties.isEmpty()) {
 			sources.addLast(new MapPropertySource("defaultProperties", this.defaultProperties));
 		}
+		// 当有控制台参数
 		if (this.addCommandLineProperties && args.length > 0) {
 			String name = CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME;
 			if (sources.contains(name)) {
@@ -568,6 +569,7 @@ public class SpringApplication {
 	}
 
 	/**
+	 * 绑定env
 	 * Bind the environment to the {@link SpringApplication}.
 	 * @param environment the environment to bind
 	 */
