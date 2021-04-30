@@ -413,6 +413,7 @@ public class SpringApplication {
 		refresh(context);
 		if (this.registerShutdownHook) {
 			try {
+				// 向JVM运行时注册一个shutdown的钩子，除非JVM当时已经关闭，否则在JVM关闭时关闭上下文。
 				context.registerShutdownHook();
 			}
 			catch (AccessControlException ex) {
@@ -725,7 +726,7 @@ public class SpringApplication {
 			logger.debug("Loading source " + StringUtils.arrayToCommaDelimitedString(sources));
 		}
 		BeanDefinitionLoader loader = createBeanDefinitionLoader(getBeanDefinitionRegistry(context), sources);
-		// 如果没注册beanNameGenerator
+		// 设置BeanName生成器，通过Debug发现此时它还没有被注册
 		if (this.beanNameGenerator != null) {
 			loader.setBeanNameGenerator(this.beanNameGenerator);
 		}
@@ -735,6 +736,7 @@ public class SpringApplication {
 		if (this.environment != null) {
 			loader.setEnvironment(this.environment);
 		}
+		// 就是解析启动类所标识的注解
 		loader.load();
 	}
 
@@ -784,6 +786,7 @@ public class SpringApplication {
 	 * @return the {@link BeanDefinitionLoader} that will be used to load beans
 	 */
 	protected BeanDefinitionLoader createBeanDefinitionLoader(BeanDefinitionRegistry registry, Object[] sources) {
+		// 外观模式
 		return new BeanDefinitionLoader(registry, sources);
 	}
 
